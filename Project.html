@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Memory Management Simulation</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Container Styling */
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.97);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #444;
+      font-size: 28px;
+      text-align: center;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h3 {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      color: #555;
+      font-size: 20px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 8px;
+    }
+
+    label {
+      display: inline-block;
+      margin: 10px 5px 5px;
+      font-weight: 600;
+      color: #555;
+      font-size: 14px;
+    }
+
+    input, select {
+      padding: 10px 15px;
+      margin: 5px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 10px 5px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button i {
+      margin-right: 8px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    /* Memory Visualization */
+    .memory-container {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 6px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f7f7f7;
+      border-radius: 12px;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .page-block {
+      width: 100%;
+      padding-top: 100%; /* Square block */
+      position: relative;
+      border: 1px solid #ccc;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      transition: all 0.3s;
+      overflow: hidden;
+    }
+
+    .page-block.allocated {
+      background-color: #6ab04c;
+    }
+
+    .page-block.code {
+      background-color: #3498db;
+    }
+
+    .page-block.data {
+      background-color: #9b59b6;
+    }
+
+    .page-block.stack {
+      background-color: #e74c3c;
+    }
+
+    /* Highlight candidate block */
+    .page-block.candidate {
+      border: 3px solid #f1c40f;
+      animation: candidateHighlight 1.5s infinite;
+    }
+
+    .page-block:hover {
+      transform: scale(1.1);
+      z-index: 10;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+
+    /* Memory status indicators */
+    .memory-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      flex: 1;
+      margin: 0 5px;
+      background: white;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 5px 0;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #777;
+      font-weight: 600;
+    }
+
+    /* Algorithm Log styling */
+    .log-container {
+      margin-top: 20px;
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: left;
+      font-size: 14px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+      font-family: 'Courier New', monospace;
+    }
+
+    .log-entry {
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #667eea;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .log-entry.warning {
+      border-left-color: #f39c12;
+      background: #fff8e1;
+    }
+
+    .log-entry.error {
+      border-left-color: #e74c3c;
+      background: #ffebee;
+    }
+
+    .log-entry.success {
+      border-left-color: #2ecc71;
+      background: #e8f5e9;
+    }
+
+    .log-entry.info {
+      border-left-color: #3498db;
+      background: #e3f2fd;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 15px;
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+      font-size: 12px;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      margin-right: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Process Tracking styling */
+    .process-tracking {
+      margin-top: 20px;
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    .process-tracking table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .process-tracking th, .process-tracking td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .process-tracking th {
+      background: #667eea;
+      color: #fff;
+    }
+
+    /* Fragmentation warning */
+    .frag-warning {
+      color: #e74c3c;
+      font-weight: bold;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes candidateHighlight {
+      0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .memory-container {
+        grid-template-columns: repeat(8, 1fr);
+      }
+      
+      .memory-stats {
+        flex-direction: column;
+      }
+      
+      .stat-box {
+        margin: 5px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container animate__animated animate__fadeInUp">
+    <h2><i class="fas fa-memory"></i> Advanced Memory Management Simulator</h2>
+
+    <div class="input-group">
+      <div style="flex: 1; margin-right: 20px;">
+        <h3><i class="fas fa-plus-circle"></i> Add Process</h3>
+        <label>Process ID:</label>
+        <input type="number" id="processId" min="1" placeholder="e.g. 1001" />
+        
+        <div style="margin-top: 15px;">
+          <label>Code Segment Size (KB):</label>
+          <input type="number" id="codeSize" min="1" placeholder="e.g. 16" />
+          
+          <label>Data Segment Size (KB):</label>
+          <input type="number" id="dataSize" min="1" placeholder="e.g. 8" />
+          
+          <label>Stack Segment Size (KB):</label>
+          <input type="number" id="stackSize" min="1" placeholder="e.g. 4" />
+        </div>
+        
+        <label>Allocation Algorithm:</label>
+        <select id="algorithm">
+          <option value="best-fit">Best-Fit</option>
+          <option value="first-fit">First-Fit</option>
+          <option value="worst-fit">Worst-Fit</option>
+        </select>
+        
+        <button onclick="allocateMemory()"><i class="fas fa-microchip"></i> Allocate Memory</button>
+      </div>
+      
+      <div style="flex: 1;">
+        <h3><i class="fas fa-trash-alt"></i> Terminate Process</h3>
+        <label>Process ID:</label>
+        <input type="number" id="terminateProcessId" placeholder="Enter process ID" />
+        <button onclick="terminateProcess()"><i class="fas fa-skull"></i> Terminate Process</button>
+        
+        <div class="memory-stats">
+          <div class="stat-box">
+            <div class="stat-value" id="totalMemory">1024</div>
+            <div class="stat-label">TOTAL MEMORY (KB)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="usedMemory">0</div>
+            <div class="stat-label">USED MEMORY (KB)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="freeMemory">1024</div>
+            <div class="stat-label">FREE MEMORY (KB)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="internalFrag">0</div>
+            <div class="stat-label">INTERNAL FRAG (KB)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="fragPercent">0%</div>
+            <div class="stat-label">FRAGMENTATION %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3><i class="fas fa-chart-bar"></i> Memory Visualization</h3>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-color" style="background-color: #3498db;"></div> Code Segment</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #9b59b6;"></div> Data Segment</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #e74c3c;"></div> Stack Segment</div>
+
+      <div class="legend-item"><div class="legend-color" style="background-color: #e0e0e0;"></div> Free Memory</div>
+    </div>
+    <div class="memory-container" id="memoryView"></div>
+
+    <h3><i class="fas fa-clipboard-list"></i> Algorithm Log</h3>
+    <div class="log-container" id="algorithmLog"></div>
+
+    <!-- New Process Tracking Section -->
+    <h3><i class="fas fa-tasks"></i> Process Tracking</h3>
+    <div class="process-tracking" id="processTracking">
+      <!-- Process tracking table will be injected here -->
+    </div>
+  </div>
+
+   <script>
+    const TOTAL_MEMORY = 1024; 
+const PAGE_SIZE = 4; 
+const TOTAL_PAGES = TOTAL_MEMORY / PAGE_SIZE;
+
+// Memory Structure
+let memory = new Array(TOTAL_PAGES).fill({ type: 'free', processId: null });
+let processes = [];
+let currentProcessId = 1000;
+
+document.getElementById("processId").value = currentProcessId;
+
+//Original Visualization Functions (Unchanged)
+
+function logMessage(message, type = "info") {
+  const logContainer = document.getElementById("algorithmLog");
+  const entry = document.createElement("div");
+  entry.classList.add("log-entry", type);
+  
+  const now = new Date();
+  const timestamp = now.toLocaleTimeString();
+  
+  let icon = "";
+  switch(type) {
+    case "warning": icon = "<i class='fas fa-exclamation-triangle'></i>"; break;
+    case "error": icon = "<i class='fas fa-times-circle'></i>"; break;
+    case "success": icon = "<i class='fas fa-check-circle'></i>"; break;
+    default: icon = "<i class='fas fa-info-circle'></i>";
+  }
+  
+  entry.innerHTML = `<span style="color: #777; font-size: 12px;">[${timestamp}]</span> ${icon} ${message}`;
+  logContainer.appendChild(entry);
+  logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById("algorithmLog").innerHTML = "";
+}
+
+function updateMemoryView(highlightIndices = [], highlightType = null) {
+  const memoryView = document.getElementById("memoryView");
+  memoryView.innerHTML = "";
+  
+  for (let i = 0; i < memory.length; i++) {
+    const block = document.createElement("div");
+    block.classList.add("page-block");
+    
+    const label = document.createElement("div");
+    label.classList.add("page-label");
+    label.textContent = i;
+    block.appendChild(label);
+    
+    if (memory[i].type === 'code') {
+      block.classList.add("code");
+    } else if (memory[i].type === 'data') {
+      block.classList.add("data");
+    } else if (memory[i].type === 'stack') {
+      block.classList.add("stack");
+    } else if (memory[i].processId !== null) {
+      block.classList.add("allocated");
+    }
+    
+    if (highlightIndices.includes(i)) {
+      block.classList.add("candidate");
+      if (highlightType) block.classList.add(highlightType);
+    }
+    
+    let tooltip = `Page ${i}\nStatus: ${memory[i].processId ? `Allocated to Process ${memory[i].processId}` : 'Free'}`;
+    if (memory[i].processId) tooltip += `\nType: ${memory[i].type}`;
+    block.title = tooltip;
+    
+    memoryView.appendChild(block);
+  }
+}
+
+// Modified Core Logic for Non-Contiguous Allocation
+
+function getFreeBlocks() {
+  let blocks = [];
+  let currentBlock = null;
+
+  for (let i = 0; i < memory.length; i++) {
+    if (memory[i].processId === null) {
+      if (!currentBlock) currentBlock = { start: i, size: 1 };
+      else currentBlock.size++;
+    } else if (currentBlock) {
+      blocks.push(currentBlock);
+      currentBlock = null;
+    }
+  }
+  if (currentBlock) blocks.push(currentBlock);
+  return blocks;
+}
+
+function findFreePages(requiredPages, algorithm) {
+  const freeBlocks = getFreeBlocks();
+  
+  // Sort blocks based on allocation strategy
+  switch(algorithm.toLowerCase()) {
+    case 'best-fit':
+      freeBlocks.sort((a, b) => a.size - b.size);
+      break;
+    case 'worst-fit':
+      freeBlocks.sort((a, b) => b.size - a.size);
+      break;
+    case 'first-fit':
+    default:
+      freeBlocks.sort((a, b) => a.start - b.start);
+  }
+
+  // Collect pages from sorted blocks
+  const allocatedPages = [];
+  for (const block of freeBlocks) {
+    const start = block.start;
+    for (let i = 0; i < block.size; i++) {
+      if (allocatedPages.length >= requiredPages) break;
+      allocatedPages.push(start + i);
+    }
+  }
+  
+  return allocatedPages.slice(0, requiredPages);
+}
+
+// 3. Original Process Management (Unchanged)
+
+function getProcessInfo(processId) {
+  return processes.find(p => p.processId === processId);
+}
+
+function countFreePages() {
+  return memory.filter(p => p.processId === null).length;
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function calculateFragmentation() {
+  let internalFrag = 0;
+  
+  processes.forEach(process => {
+    const codeWasted = (process.codePages.length * PAGE_SIZE) - process.codeSize;
+    const dataWasted = (process.dataPages.length * PAGE_SIZE) - process.dataSize;
+    const stackWasted = (process.stackPages.length * PAGE_SIZE) - process.stackSize;
+    
+    if (codeWasted > 0) internalFrag += codeWasted;
+    if (dataWasted > 0) internalFrag += dataWasted;
+    if (stackWasted > 0) internalFrag += stackWasted;
+  });
+  
+  return {
+    internalFrag,
+    fragmentationPercent: TOTAL_MEMORY > 0 ? 
+      Math.round((internalFrag / TOTAL_MEMORY) * 100) : 0
+  };
+}
+
+// 4. Allocation and Termination (Strategy-Enabled)
+// ------------------------------------------------
+async function allocateMemory() {
+  clearLog();
+  
+  const processId = parseInt(document.getElementById("processId").value);
+  const codeSize = parseInt(document.getElementById("codeSize").value);
+  const dataSize = parseInt(document.getElementById("dataSize").value);
+  const stackSize = parseInt(document.getElementById("stackSize").value);
+  const algorithm = document.getElementById("algorithm").value;
+
+  // Validation
+  if (!processId || [codeSize, dataSize, stackSize].some(v => isNaN(v) || v <= 0)) {
+    alert("Please enter valid process details!");
+    logMessage("Invalid input: All fields must be positive numbers.", "error");
+    return;
+  }
+
+  // Calculate required pages
+  const codePagesRequired = Math.ceil(codeSize / PAGE_SIZE);
+  const dataPagesRequired = Math.ceil(dataSize / PAGE_SIZE);
+  const stackPagesRequired = Math.ceil(stackSize / PAGE_SIZE);
+  const totalPagesRequired = codePagesRequired + dataPagesRequired + stackPagesRequired;
+  
+  logMessage(`Process ${processId} requested memory allocation:`, "info");
+  logMessage(`• Code: ${codeSize} KB (${codePagesRequired} pages)`, "info");
+  logMessage(`• Data: ${dataSize} KB (${dataPagesRequired} pages)`, "info");
+  logMessage(`• Stack: ${stackSize} KB (${stackPagesRequired} pages)`, "info");
+  logMessage(`Total required: ${totalPagesRequired} pages (${totalPagesRequired * PAGE_SIZE} KB)`, "info");
+
+  // Check memory availability
+  if (countFreePages() < totalPagesRequired) {
+    alert("Not enough memory available!");
+    logMessage(`Insufficient memory. Required: ${totalPagesRequired} pages, Available: ${countFreePages()} pages.`, "error");
+    return;
+  }
+
+  try {
+    // Allocate segments using strategy
+    const allocateSegment = async (segment, pagesNeeded) => {
+      const pages = findFreePages(pagesNeeded, algorithm);
+      if (pages.length < pagesNeeded) throw new Error(`${segment} allocation failed`);
+      
+      pages.forEach(page => {
+        memory[page] = { type: segment, processId };
+      });
+      
+      updateMemoryView(pages, segment);
+      await delay(1000);
+      return pages;
+    };
+
+    const codePages = await allocateSegment('code', codePagesRequired);
+    const dataPages = await allocateSegment('data', dataPagesRequired);
+    const stackPages = await allocateSegment('stack', stackPagesRequired);
+
+    // Register process
+    processes.push({
+      processId,
+      codePages,
+      dataPages,
+      stackPages,
+      allPages: [...codePages, ...dataPages, ...stackPages],
+      codeSize,
+      dataSize,
+      stackSize
+    });
+
+    // Update UI
+    updateMemoryStatus();
+    updateProcessTracking();
+    logMessage(`Memory successfully allocated to Process ${processId}!`, "success");
+    logMessage(`Code segment: pages [${codePages.join(", ")}]`, "success");
+    logMessage(`Data segment: pages [${dataPages.join(", ")}]`, "success");
+    logMessage(`Stack segment: pages [${stackPages.join(", ")}]`, "success");
+
+    // Fragmentation info
+    const fragStats = calculateFragmentation();
+    logMessage(`Internal fragmentation: ${fragStats.internalFrag} KB`, "info");
+    logMessage(`Total fragmentation: ${fragStats.fragmentationPercent}%`, 
+               fragStats.fragmentationPercent > 30 ? "warning" : "info");
+
+    // Prepare next allocation
+    currentProcessId++;
+    document.getElementById("processId").value = currentProcessId;
+    document.querySelectorAll("#codeSize, #dataSize, #stackSize").forEach(field => field.value = "");
+  } catch (error) {
+    memory = memory.map(page => page.processId === processId ? { type: 'free', processId: null } : page);
+    logMessage(`Allocation failed: ${error.message}`, "error");
+    updateMemoryStatus();
+  }
+}
+
+function terminateProcess() {
+  clearLog();
+  const processId = parseInt(document.getElementById("terminateProcessId").value);
+  
+  if (isNaN(processId)) {
+    alert("Please enter a valid process ID!");
+    logMessage("Invalid process ID entered.", "error");
+    return;
+  }
+  
+  const processIndex = processes.findIndex(p => p.processId === processId);
+  if (processIndex === -1) {
+    alert("Process not found!");
+    logMessage(`Process ${processId} not found in memory.`, "error");
+    return;
+  }
+  
+  const process = processes[processIndex];
+  logMessage(`Found Process ${processId} with:`, "info");
+  logMessage(`• Code segment: pages [${process.codePages.join(", ")}]`, "info");
+  logMessage(`• Data segment: pages [${process.dataPages.join(", ")}]`, "info");
+  logMessage(`• Stack segment: pages [${process.stackPages.join(", ")}]`, "info");
+  
+  updateMemoryView(process.allPages, "stack");
+  
+  setTimeout(() => {
+    process.allPages.forEach(page => {
+      memory[page] = { type: 'free', processId: null };
+    });
+    
+    processes.splice(processIndex, 1);
+    logMessage(`Process ${processId} terminated. Freed ${process.allPages.length} pages.`, "success");
+    
+    const fragStats = calculateFragmentation();
+    logMessage(`Current internal fragmentation: ${fragStats.internalFrag} KB`, "info");
+    logMessage(`Current total fragmentation: ${fragStats.fragmentationPercent}%`, 
+               fragStats.fragmentationPercent > 30 ? "warning" : "info");
+    
+    updateMemoryStatus();
+    updateProcessTracking();
+    document.getElementById("terminateProcessId").value = "";
+  }, 1500);
+}
+
+// 5. Memory Status and Initialization
+// -----------------------------------
+function updateMemoryStatus() {
+  const usedPages = memory.filter(p => p.processId !== null).length;
+  const usedMemory = usedPages * PAGE_SIZE;
+  const freeMemory = TOTAL_MEMORY - usedMemory;
+  
+  document.getElementById("usedMemory").textContent = usedMemory;
+  document.getElementById("freeMemory").textContent = freeMemory;
+  
+  const fragStats = calculateFragmentation();
+  document.getElementById("internalFrag").textContent = fragStats.internalFrag;
+  document.getElementById("fragPercent").textContent = `${fragStats.fragmentationPercent}%`;
+  
+  const usedPercent = (usedMemory / TOTAL_MEMORY) * 100;
+  const usedElement = document.getElementById("usedMemory");
+  usedElement.style.color = usedPercent > 80 ? "#e74c3c" : 
+                           usedPercent > 50 ? "#f39c12" : "#2ecc71";
+  
+  const fragPercentElement = document.getElementById("fragPercent");
+  fragPercentElement.style.color = fragStats.fragmentationPercent > 30 ? "#e74c3c" : 
+                                  fragStats.fragmentationPercent > 15 ? "#f39c12" : "#2ecc71";
+  
+  updateMemoryView();
+}
+
+function updateProcessTracking() {
+  const trackingContainer = document.getElementById("processTracking");
+  trackingContainer.innerHTML = "";
+  
+  if (processes.length === 0) {
+    trackingContainer.innerHTML = "<p>No processes are currently allocated.</p>";
+    return;
+  }
+  
+  const table = document.createElement("table");
+  const headers = ["Process ID", "Code Pages", "Data Pages", "Stack Pages", "All Pages", "Internal Frag (KB)"];
+  
+  const headerRow = document.createElement("tr");
+  headers.forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+  
+  processes.forEach(proc => {
+    const row = document.createElement("tr");
+    const codeWasted = (proc.codePages.length * PAGE_SIZE) - proc.codeSize;
+    const dataWasted = (proc.dataPages.length * PAGE_SIZE) - proc.dataSize;
+    const stackWasted = (proc.stackPages.length * PAGE_SIZE) - proc.stackSize;
+    let processFrag = 0;
+    if (codeWasted > 0) processFrag += codeWasted;
+    if (dataWasted > 0) processFrag += dataWasted;
+    if (stackWasted > 0) processFrag += stackWasted;
+    
+    const cells = [
+      proc.processId,
+      proc.codePages.join(", "),
+      proc.dataPages.join(", "),
+      proc.stackPages.join(", "),
+      proc.allPages.join(", "),
+      processFrag
+    ];
+    
+    cells.forEach(cellData => {
+      const td = document.createElement("td");
+      td.textContent = cellData;
+      row.appendChild(td);
+    });
+    table.appendChild(row);
+  });
+  
+  trackingContainer.appendChild(table);
+}
+
+function initSimulation() {
+  memory = new Array(TOTAL_PAGES).fill({ type: 'free', processId: null });
+  processes = [];
+  currentProcessId = 1000;
+  document.getElementById("processId").value = currentProcessId;
+  updateMemoryStatus();
+  updateProcessTracking();
+  logMessage("Memory management simulator initialized.", "info");
+  logMessage(`Total memory: ${TOTAL_MEMORY} KB (${TOTAL_PAGES} pages of ${PAGE_SIZE} KB each)`, "info");
+  logMessage("Ready for memory allocation requests.", "success");
+}
+
+window.onload = initSimulation;
+</script>
+  
+</body>
+</html>
