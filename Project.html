@@ -38,7 +38,7 @@
       padding: 20px;
     }
 
-    /* Container Styling */
+    
     .container {
       width: 90%;
       max-width: 1200px;
@@ -127,7 +127,7 @@
       margin-bottom: 10px;
     }
 
-    /* Memory Visualization */
+ 
     .memory-container {
       display: grid;
       grid-template-columns: repeat(16, 1fr);
@@ -167,7 +167,7 @@
       background-color: #e74c3c;
     }
 
-    /* Highlight candidate block */
+  
     .page-block.candidate {
       border: 3px solid #f1c40f;
       animation: candidateHighlight 1.5s infinite;
@@ -191,7 +191,7 @@
       pointer-events: none;
     }
 
-    /* Memory status indicators */
+    
     .memory-stats {
       display: flex;
       justify-content: space-between;
@@ -223,7 +223,7 @@
       font-weight: 600;
     }
 
-    /* Algorithm Log styling */
+
     .log-container {
       margin-top: 20px;
       background: #f5f5f5;
@@ -267,7 +267,7 @@
       background: #e3f2fd;
     }
 
-    /* Legend */
+
     .legend {
       display: flex;
       flex-wrap: wrap;
@@ -317,7 +317,7 @@
       color: #fff;
     }
 
-    /* Fragmentation warning */
+   
     .frag-warning {
       color: #e74c3c;
       font-weight: bold;
@@ -325,7 +325,7 @@
       font-size: 12px;
     }
 
-    /* Animations */
+   
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -354,7 +354,7 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Responsive adjustments */
+   
     @media (max-width: 768px) {
       .memory-container {
         grid-template-columns: repeat(8, 1fr);
@@ -445,10 +445,10 @@
     <h3><i class="fas fa-clipboard-list"></i> Algorithm Log</h3>
     <div class="log-container" id="algorithmLog"></div>
 
-    <!-- New Process Tracking Section -->
+    
     <h3><i class="fas fa-tasks"></i> Process Tracking</h3>
     <div class="process-tracking" id="processTracking">
-      <!-- Process tracking table will be injected here -->
+     
     </div>
   </div>
 
@@ -457,14 +457,14 @@
 const PAGE_SIZE = 4; 
 const TOTAL_PAGES = TOTAL_MEMORY / PAGE_SIZE;
 
-// Memory Structure
+
 let memory = new Array(TOTAL_PAGES).fill({ type: 'free', processId: null });
 let processes = [];
 let currentProcessId = 1000;
 
 document.getElementById("processId").value = currentProcessId;
 
-//Original Visualization Functions (Unchanged)
+
 
 function logMessage(message, type = "info") {
   const logContainer = document.getElementById("algorithmLog");
@@ -527,7 +527,7 @@ function updateMemoryView(highlightIndices = [], highlightType = null) {
   }
 }
 
-// Modified Core Logic for Non-Contiguous Allocation
+
 
 function getFreeBlocks() {
   let blocks = [];
@@ -562,7 +562,7 @@ function findFreePages(requiredPages, algorithm) {
       freeBlocks.sort((a, b) => a.start - b.start);
   }
 
-  // Collect pages from sorted blocks
+  
   const allocatedPages = [];
   for (const block of freeBlocks) {
     const start = block.start;
@@ -575,7 +575,7 @@ function findFreePages(requiredPages, algorithm) {
   return allocatedPages.slice(0, requiredPages);
 }
 
-// 3. Original Process Management (Unchanged)
+
 
 function getProcessInfo(processId) {
   return processes.find(p => p.processId === processId);
@@ -609,8 +609,8 @@ function calculateFragmentation() {
   };
 }
 
-// 4. Allocation and Termination (Strategy-Enabled)
-// ------------------------------------------------
+
+
 async function allocateMemory() {
   clearLog();
   
@@ -627,7 +627,6 @@ async function allocateMemory() {
     return;
   }
 
-  // Calculate required pages
   const codePagesRequired = Math.ceil(codeSize / PAGE_SIZE);
   const dataPagesRequired = Math.ceil(dataSize / PAGE_SIZE);
   const stackPagesRequired = Math.ceil(stackSize / PAGE_SIZE);
@@ -639,7 +638,6 @@ async function allocateMemory() {
   logMessage(`• Stack: ${stackSize} KB (${stackPagesRequired} pages)`, "info");
   logMessage(`Total required: ${totalPagesRequired} pages (${totalPagesRequired * PAGE_SIZE} KB)`, "info");
 
-  // Check memory availability
   if (countFreePages() < totalPagesRequired) {
     alert("Not enough memory available!");
     logMessage(`Insufficient memory. Required: ${totalPagesRequired} pages, Available: ${countFreePages()} pages.`, "error");
@@ -647,7 +645,7 @@ async function allocateMemory() {
   }
 
   try {
-    // Allocate segments using strategy
+ 
     const allocateSegment = async (segment, pagesNeeded) => {
       const pages = findFreePages(pagesNeeded, algorithm);
       if (pages.length < pagesNeeded) throw new Error(`${segment} allocation failed`);
@@ -665,7 +663,7 @@ async function allocateMemory() {
     const dataPages = await allocateSegment('data', dataPagesRequired);
     const stackPages = await allocateSegment('stack', stackPagesRequired);
 
-    // Register process
+
     processes.push({
       processId,
       codePages,
@@ -677,7 +675,7 @@ async function allocateMemory() {
       stackSize
     });
 
-    // Update UI
+
     updateMemoryStatus();
     updateProcessTracking();
     logMessage(`Memory successfully allocated to Process ${processId}!`, "success");
@@ -691,7 +689,6 @@ async function allocateMemory() {
     logMessage(`Total fragmentation: ${fragStats.fragmentationPercent}%`, 
                fragStats.fragmentationPercent > 30 ? "warning" : "info");
 
-    // Prepare next allocation
     currentProcessId++;
     document.getElementById("processId").value = currentProcessId;
     document.querySelectorAll("#codeSize, #dataSize, #stackSize").forEach(field => field.value = "");
@@ -746,8 +743,8 @@ function terminateProcess() {
   }, 1500);
 }
 
-// 5. Memory Status and Initialization
-// -----------------------------------
+
+
 function updateMemoryStatus() {
   const usedPages = memory.filter(p => p.processId !== null).length;
   const usedMemory = usedPages * PAGE_SIZE;
