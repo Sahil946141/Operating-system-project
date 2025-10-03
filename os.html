@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Management Simulator</title>
+    <link rel="stylesheet" href="os.css">
+</head>
+<body>
+    <h1>Memory Management Simulator</h1>
+    
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('physical')">Physical Memory</div>
+        <div class="tab" onclick="switchTab('paging')">Paging System</div>
+        <div class="tab" onclick="switchTab('virtual')">Virtual Memory</div>
+    </div>
+    
+    <div id="physical" class="tab-content active">
+        <h2>Physical Memory</h2>
+        <div class="memory-container" id="memory-view"></div>
+        <div>
+            <button onclick="allocateMemory()">Allocate Memory</button>
+            <button onclick="freeMemory()">Free Memory</button>
+        </div>
+    </div>
+    
+    <div id="paging" class="tab-content">
+        <h2>Paging System</h2>
+        <div id="page-tables"></div>
+        <div>
+            <select id="replacement-algorithm">
+                <option value="fifo">FIFO</option>
+                <option value="lru">LRU</option>
+                <option value="clock">Clock</option>
+            </select>
+            <button onclick="simulatePageAccess()">Simulate Page Access</button>
+        </div>
+        <div id="replacement-log" class="log"></div>
+    </div>
+    
+    <div id="virtual" class="tab-content">
+        <h2>Virtual Memory</h2>
+        <div class="memory-container" id="swap-view"></div>
+        <div>Page Faults: <span id="page-faults">0</span></div>
+    </div>
+
+   <script src="os.js"></script>
+</body>
+</html>
